@@ -1,0 +1,21 @@
+{
+    "name": "lubaogui/yii2-common",
+    "description": "yii2基础的一些通用类",
+    "type": "yii2-extension",
+    "keywords": ["yii2","extension","common"],
+    "license": "GPL-3.0+",
+    "authors": [
+        {
+            "name": "lubaogui",
+            "email": "lbaogui@lubanr.com"
+        }
+    ],
+    "require": {
+        "yiisoft/yii2": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "lubaogui\\common\\": ""
+        }
+    }
+}
