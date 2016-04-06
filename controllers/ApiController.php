@@ -1,13 +1,12 @@
 <?php
-namespace common\controllers;
+namespace lubaogui\common\controllers;
 
 use Yii;
 use yii\rest\Controller;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
-use common\models\User;
-use common\validators\SignValidator;
-use lubaogui\account\exceptions\LBUserException;
+use lubaogui\common\validators\SignValidator;
+use lubaogui\common\exceptions\LBUserException;
 
 /**
  * @brief ApiContoller 基于移动端的controller接口基类

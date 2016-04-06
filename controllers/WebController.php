@@ -3,10 +3,8 @@ namespace lubaogui\common\controllers;
 
 use Yii;
 use yii\web\Controller;
-use yii\web\UploadedFile;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
-use lubaogui\common\validators\SignValidator;
 use lubaogui\common\exceptions\LBUserException;
 
 /**
