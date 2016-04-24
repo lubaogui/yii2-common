@@ -32,6 +32,9 @@ use yii\helpers\VarDumper;
 class LBErrorHandler extends \yii\base\ErrorHandler
 {
 
+    //处理error的用户定义errorAction
+    public $errorAction; 
+
     /**
      * @brief 初始化设置，主要设置错误页面模板等信息
      *
