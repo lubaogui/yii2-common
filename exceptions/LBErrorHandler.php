@@ -85,7 +85,7 @@ class LBErrorHandler extends \yii\base\ErrorHandler
             if ($result instanceof Response) { 
                 $result = $result;
             } else { 
-                $result->data = $result;
+                $response->data = $result;
             }
         }
         //response是html,处于挑食模式且异常不是用户抛出的异常
