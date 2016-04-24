@@ -74,39 +74,50 @@ class LBErrorHandler extends \yii\base\ErrorHandler
             $response = new Response();
         }
 
-        $useErrorView = $response->format === Response::FORMAT_HTML && (!YII_DEBUG);
-
+        $useErrorView = $response->format === Response::FORMAT_HTML && (!YII_DEBUG || $exception instanceof UserException);
         //如果是用户定义的异常，则需要将异常错误信息抛出,如果是接口类型的并且有model类型的错误
-        if ($useErrorView) {
-            if ($this->errorAction !== null) {
-                $result = Yii::$app->runAction($this->errorAction); 
-                if ($result instanceof Response) { 
-                    $result = $result;
-                } else { 
-                    $result->data = $result;
-                }
+        //需要使用用户定制的errorView,同时用户在配置文件中指定了errorAction
+        if ($useErrorView && $this->errorAction !== null) {
+            $result = Yii::$app->runAction($this->errorAction); 
+            if ($result instanceof Response) { 
+                $result = $result;
+            } else { 
+                $result->data = $result;
+            }
+        }
+        //response是html,处于挑食模式且异常不是用户抛出的异常
+        elseif ($response->format === Response::FORMAT_HTML) {
+            if (YII_ENV_TEST || isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
+                $response->data = '<pre>' . $this->htmlEncode(static::convertExceptionToString($exception)) . '</pre>';
             }
             else {
-                //在没有默认异常处理action的情况下，直接渲染文件
-                $file = $useErrorView ? $this->errorView : $this->exceptionView; 
-                $responseData = $this->renderFile($file, ['exception'=>$exception]);
+                if (YII_DEBUG) {
+                    ini_set('display_errors', 1);
+                }
+                $file = $useErrorView ? $this->errorView : $this->exceptionView;
+                $response->data = $this->renderFile($file, [
+                    'exception' => $exception,
+                ]);
+
+            }
+        }
+        elseif ($response->format === Response::FORMAT_RAW) {
+            $response->data = static::convertExceptionToString($exception);
+
+        }
+        elseif ($response->format === Response::FORMAT_JSON || $response->format === Response::FORMAT_XML) {
+            $response->data = [
+                'code' => $exception->getCode(),
+                    'message' => $exception->getMessage(),
+                ];
+            if ($exception instanceof LBUserException) {
+                $response->data['errors'] = $exception->getErrors();
             }
         }
         else {
-            if ($response->format === Response::FORMAT_JSON || $response->format === Response::FORMAT_XML) {
-                $response->data = [
-                    'code' => $exception->getCode(),
-                        'message' => $exception->getMessage(),
-                        ];
-                if ($exception instanceof LBUserException) {
-                    $response->data['errors'] = $exception->getErrors();
-                }
-            }
-            else {
-                $response->data = $this->convertExceptionToArray($exception);
-            }
+            $response->data = $this->convertExceptionToArray($exception);
         }
-    
+
         //调试状态状态码为500, 非调试状态不抛出异常 
         if (!YII_DEBUG || $exception instanceof LBUserException) {
             $response->setStatusCode(200);
